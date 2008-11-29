@@ -1,11 +1,11 @@
 (function($){
 
 $.jsonRpc = $.jsonRpc || function(options) {
+    options.type = options.type || 'POST';
     var ajaxOptions = {
-        type: 'POST',
         contentType: 'application/json',
-        dataType: 'json',
-        processData: false
+        dataType:  options.type == 'GET' ? 'jsonp' : 'json',
+        processData: options.type == 'GET'
     };
 
     var data = {
@@ -17,6 +17,7 @@ $.jsonRpc = $.jsonRpc || function(options) {
 
     function send() {
         options.data = JSON.stringify(data);
+        if (options.type == 'GET') options.data = {json: options.data};
         $.ajax($.extend(ajaxOptions, options));
     }
     
