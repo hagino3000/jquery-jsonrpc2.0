@@ -1,7 +1,7 @@
 (function($){
 
 $.jsonRpc = $.jsonRpc || function(options) {
-    options.type = options.type || 'POST';
+    options.type = options.type || 'GET';
     var ajaxOptions = {
         contentType: 'application/json',
         dataType:  options.type == 'GET' ? 'jsonp' : 'json',
@@ -27,6 +27,6 @@ $.jsonRpc = $.jsonRpc || function(options) {
         send();
     }
     return $;
-}
+};
 
 })(jQuery);
