@@ -5,10 +5,11 @@
     return $.ajax({
       url: options.url || window.location.href,
       type: options.type || 'POST',      
-      contentType: options.contentType || 'application/json',
-      dataType: options.dataType || 'json',
+      contentType: 'application/json',
+      dataFilter: function(data) {
+        return JSON.parse(data);
+      },
       data: JSON.stringify({
-        version: options.version || '1.0',
         method: options.method || 'system.listMethods',
         params: options.params || []
       }),
