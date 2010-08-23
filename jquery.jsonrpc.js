@@ -11,20 +11,25 @@
  * Requires json2.js<http://www.json.org/json2.js> if borowser not supported the window.JSON.
  *
  * Usage:
- *   $.jsonRpc(url, data[, callbackFunc]);
+ *   $.jsonRpc(url, data [, callbacks] [, debug]);
+ *
+ *   where data = {method:'methodname', params:{par1:'some', par2:'data'}}
+ *   and callbacks = {success: successFunc, fault: faultFunc, error: errorFunc}
  *
  * Examples:
  *   // RPC call with named parameters
  *   $.jsonRpc('/rpc', {
  *     method : 'createUser',
  *     params : {name : 'John Smith', userId : '1000'}
- *   }, function(response, status) {
- *     // callback
- *     console.info(status);
- *     if (response.error) {
- *       console.dir(response.error);
- *     } else {
- *       doSomething(response.result);
+ *   }, {
+       success : function(response, status) {
+ *       // callback
+ *       console.info(status);
+ *       if (response.error) {
+ *         console.dir(response.error);
+ *       } else {
+ *         doSomething(response.result);
+ *       }
  *     }
  *   });
  *
@@ -40,33 +45,45 @@
  */
 (function($) {
 
-  var rpcid = 0;
+  var rpcid = 1;
 
-  $.jsonRpc = $.jsonRpc || function(url, data, callback) {
+  $.jsonRpc = $.jsonRpc || function(url, data, callbacks, debug) {
 
     var postdata = {
       jsonrpc : '2.0',
       method : data.method || '',
       params : data.params || {}
     }
-    if (callback) {
+    if (callbacks) {
       postdata.id = data.id || rpcid++;
     }
+
+    debug = debug || false
 
     var ajaxopts = {
       url : url,
       contentType : 'application/json',
       dataType : 'json',
       type : 'POST',
+      dataFilter: function(data, type) {
+        if (debug && console != undefined) console.info(data);
+        return JSON.parse(data);
+      },
       processData : false,
       data : JSON.stringify(postdata),
-      success : callback,
-      error : function(xhr, e) {
-        if (xhr.responseText) {
-          callback(JSON.parse(xhr.responseText), e);
-        }
+      success : function(resp) {
+        if (resp && !resp.error) return callbacks.success && callbacks.success(resp.result);
+        else if (resp) return callbacks.fault && resp.error.message && callbacks.fault(resp.error.message);
+        else return false;
+      },
+      error : function(xhr, status, error) {
+        return callbacks.error && callbacks.error(xhr, status, error);
       }
     }
+    if (data.timeout){
+      ajaxopts['timeout'] = data.timeout
+    }
+    
     $.ajax(ajaxopts);
 
     return $;
