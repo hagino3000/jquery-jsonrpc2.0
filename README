@@ -5,27 +5,37 @@ JSON-RPC is a stateless, light-weight remote procedure call (RPC) protocol.
 Read more in the <http://groups.google.com/group/json-rpc/web/json-rpc-2-0>
 
 Usage:
-  $.jsonRpc(url, data[, callbackFunc]);
+  $.jsonrpc(url, data [, callbacks] [, debug]);
+
+  where data = {method:'methodname', params:['positional', 'parameters']}
+  or data = {method:'complexmethod', params:{named:'parameters', works:'too!'}}
+  and callbacks = {success: successFunc, fault: faultFunc, error: errorFunc}
+
+  Setting no callback produces a JSON-RPC Notification.
+  'data' accepts 'timeout' keyword too, who sets the $.ajax request timeout.
+  Setting 'debug' to true prints responses to Firebug's console.info
 
 Examples:
-  // RPC call with named parameters
-  $.jsonRpc('/rpc', {
+  // A RPC call with named parameters
+  $.jsonrpc('/rpc', {
     method : 'createUser',
     params : {name : 'John Smith', userId : '1000'}
-  }, function(response, status) {
-    // callback
-    console.info(status);
-    if (response.error) {
-      console.dir(response.error);
-    } else {
-      doSomething(response.result);
-    }
+  }, {
+    success : doSomething(response),
+    fault : handleFault(response, errordata),
+    error : handleError(request, status, error);
   });
 
   // A Notification 
-  $.jsonRpc('/rpc', {
+  $.jsonrpc('/rpc', {
     method : 'notify',
     params : {action : 'logout', userId : '1000'}
   });
 
-
+  // A Notification using console to debug and with timeout set
+  $.jsonrpc('/rpc', {
+    method : 'notify',
+    params : {action : 'logout', userId : '1000'},
+    debug : true,
+    timeout : 500,
+  });
