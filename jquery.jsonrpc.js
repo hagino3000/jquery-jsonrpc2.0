@@ -12,10 +12,10 @@
  * Requires json2.js<http://www.json.org/json2.js> if browser has not window.JSON.
  *
  * Usage:
- *   $.jsonrpc(url, data [, callbacks] [, debug]);
+ *   $.jsonrpc(data [, callbacks [, debug]]);
  *
- *   where data = {method:'methodname', params:['positional', 'parameters']}
- *   or data = {method:'complexmethod', params:{named:'parameters', works:'too!'}}
+ *   where data = {url: '/rpc/', method:'simplefunc', params:['posi', 'tional']}
+ *   or data = {url: '/rpc/', method:'complexfunc', params:{nam:'ed', par:'ams'}}
  *   and callbacks = {success: successFunc, fault: faultFunc, error: errorFunc}
  *
  *   Setting no callback produces a JSON-RPC Notification.
@@ -24,7 +24,8 @@
  *
  * Examples:
  *   // A RPC call with named parameters
- *   $.jsonrpc('/rpc', {
+ *   $.jsonrpc({
+ *     url : '/rpc', 
  *     method : 'createUser',
  *     params : {name : 'John Smith', userId : '1000'}
  *   }, {
@@ -34,13 +35,15 @@
  *   });
  *
  *   // A Notification 
- *   $.jsonrpc('/rpc', {
+ *   $.jsonrpc({
+ *     url : '/rpc', 
  *     method : 'notify',
  *     params : {action : 'logout', userId : '1000'}
  *   });
  *
  *   // A Notification using console to debug and with timeout set
- *   $.jsonrpc('/rpc', {
+ *   $.jsonrpc({
+ *     url : '/rpc', 
  *     method : 'notify',
  *     params : {action : 'logout', userId : '1000'},
  *     debug : true,
@@ -54,8 +57,8 @@
    
   var rpcid = 1;
    
-  $.jsonrpc = $.jsonrpc || function(url, data, callbacks, debug) {
-   
+  $.jsonrpc = $.jsonrpc || function(data, callbacks, debug) {
+    
     var postdata = {
       jsonrpc : '2.0',
       method : data.method || '',
@@ -65,26 +68,35 @@
       postdata.id = data.id || rpcid++;
     }
    
+    var url = data.url || this.defaultUrl
     debug = debug || false
 
     var ajaxopts = {
-      url : url,
+      url : $.jsonrpc.defaultUrl,
       contentType : 'application/json',
       dataType : 'json',
       type : 'POST',
       dataFilter: function(data, type) {
         if (debug && console != undefined) console.info(data);
+        if (data == '')
+          return ''
         return JSON.parse(data);
       },
       processData : false,
       data : JSON.stringify(postdata),
       success : function(resp) {
-        if (resp && !resp.error) return callbacks.success && callbacks.success(resp.result);
-        else if (resp && resp.error) return callbacks.fault && callbacks.fault(resp.error.message, resp.error.data);
-        else return callbacks.fault && callbacks.fault(resp);
+        if (!callbacks) return true;
+        if (resp && !resp.error) return callbacks && callbacks.success && callbacks.success(resp.result);
+        else if (resp && resp.error) return callbacks && callbacks.fault && callbacks.fault(resp.error.message, resp.error.data);
+        else return callbacks && callbacks.fault && callbacks.fault(resp);
       },
       error : function(xhr, status, error) {
-        return callbacks.error && callbacks.error(xhr, status, error);
+        if (!callbacks){
+          if (debug)
+            $.error(error);
+          return false
+        }else
+          return callbacks.error && callbacks.error(xhr, status, error);
       }
     }
     if (data.timeout){
@@ -95,6 +107,8 @@
 
     return $;
   }
+  
+  $.jsonrpc.defaultUrl = $.jsonrpc.defaultUrl || '/jsonrpc/'
 
 })(jQuery);
 

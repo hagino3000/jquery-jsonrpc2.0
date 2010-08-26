@@ -17,7 +17,8 @@ Usage:
 
 Examples:
   // A RPC call with named parameters
-  $.jsonrpc('/rpc', {
+  $.jsonrpc({
+    url : '/rpc', 
     method : 'createUser',
     params : {name : 'John Smith', userId : '1000'}
   }, {
@@ -27,13 +28,15 @@ Examples:
   });
 
   // A Notification 
-  $.jsonrpc('/rpc', {
+  $.jsonrpc({
+    url : '/rpc', 
     method : 'notify',
     params : {action : 'logout', userId : '1000'}
   });
 
   // A Notification using console to debug and with timeout set
-  $.jsonrpc('/rpc', {
+  $.jsonrpc({
+    url : '/rpc', 
     method : 'notify',
     params : {action : 'logout', userId : '1000'},
     debug : true,
