@@ -50,6 +50,19 @@
  *     timeout : 500,
  *   });
  *
+ *   // Set DataFilter. It is useful for buggy API that returns not json but text/html when error(500 or 403..).
+ *   $.jsonrpc({
+ *     url : '/rpc',
+ *     method : 'getUser',
+ *     dataFilterFn : function(data, type) {
+ *       try {
+ *         return JSON.parse(data);
+ *       } catch(e) {
+ *         return {error : {message : 'Cannot parse response', data : data}};
+ *       }
+ *     }
+ *   });
+ *
  * This document is licensed as free software under the terms of the
  * MIT License: http://www.opensource.org/licenses/mit-license.php
  */
@@ -77,13 +90,22 @@
         fault : callbacks
       }
     }
+
+    var dataFilterFn = data.fataFilterFn;
    
     debug = debug || false;
 
     var ajaxopts = {
       url : data.url || $.jsonrpc.defaultUrl,
       contentType : 'application/json',
-      dataType : 'json',
+      dataType : 'text', 
+      dataFilter : function(data, type) {
+        if (dataFilterFn) {
+          return dataFilterFn;
+        } else {
+          return JSON.parse(data);
+        }
+      },
       type : 'POST',
       processData : false,
       data : JSON.stringify(postdata),
