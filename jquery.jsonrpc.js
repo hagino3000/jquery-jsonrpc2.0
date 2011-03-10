@@ -58,7 +58,7 @@
   var rpcid = 1;
    
   $.jsonrpc = $.jsonrpc || function(data, callbacks, debug) {
-    
+
     var postdata = {
       jsonrpc : '2.0',
       method : data.method || '',
@@ -67,36 +67,44 @@
     if (callbacks) {
       postdata.id = data.id || rpcid++;
     }
+
+    if (!callbacks) {
+      callbacks = function(){};
+    }
+    if (typeof(callbacks) === 'function') {
+      callbacks = {
+        success : callbacks,
+        fault : callbacks
+      }
+    }
    
-    var url = data.url || this.defaultUrl
-    debug = debug || false
+    debug = debug || false;
 
     var ajaxopts = {
-      url : $.jsonrpc.defaultUrl,
+      url : data.url || $.jsonrpc.defaultUrl,
       contentType : 'application/json',
       dataType : 'json',
       type : 'POST',
-      dataFilter: function(data, type) {
-        if (debug && console != undefined) console.info(data);
-        if (data == '')
-          return ''
-        return JSON.parse(data);
-      },
       processData : false,
       data : JSON.stringify(postdata),
       success : function(resp) {
-        if (!callbacks) return true;
-        if (resp && !resp.error) return callbacks && callbacks.success && callbacks.success(resp.result);
-        else if (resp && resp.error) return callbacks && callbacks.fault && callbacks.fault(resp.error.message, resp.error.data);
-        else return callbacks && callbacks.fault && callbacks.fault(resp);
+        if (resp && !resp.error) {
+          return callbacks.success && callbacks.success(resp.result);
+        } else if (resp && resp.error) {
+          return callbacks.fault && callbacks.fault(resp.error.message, resp.error.data);
+        } else {
+          return callbacks.fault && callbacks.fault(resp);
+        }
       },
       error : function(xhr, status, error) {
-        if (!callbacks){
-          if (debug)
-            $.error(error);
-          return false
-        }else
+        if (callbacks.error){
           return callbacks.error && callbacks.error(xhr, status, error);
+        } else {
+          if (debug) {
+            $.error(error);
+          }
+          return false
+        }
       }
     }
     if (data.timeout){
