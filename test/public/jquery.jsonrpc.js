@@ -73,48 +73,48 @@
  * MIT License: http://www.opensource.org/licenses/mit-license.php
  */
 (function($) {
-   
+
   var rpcid = 1,
-      emptyFn = function(){};
-   
+      emptyFn = function() {};
+
   $.jsonrpc = $.jsonrpc || function(data, callbacks, debug) {
     debug = debug || false;
 
     var postdata = {
-      jsonrpc : '2.0',
-      method : data.method || '',
-      params : data.params || {}
-    }
+      jsonrpc: '2.0',
+      method: data.method || '',
+      params: data.params || {}
+    };
     if (callbacks) {
       postdata.id = data.id || rpcid++;
     } else {
-      callbacks = emptyFn; 
+      callbacks = emptyFn;
     }
 
     if (typeof(callbacks) === 'function') {
       callbacks = {
-        success : callbacks,
-        fault : callbacks
-      }
+        success: callbacks,
+        fault: callbacks
+      };
     }
 
     var dataFilter = data.dataFilter;
 
     var ajaxopts = {
-      url : data.url || $.jsonrpc.defaultUrl,
-      contentType : 'application/json',
-      dataType : 'text', 
-      dataFilter : function(data, type) {
+      url: data.url || $.jsonrpc.defaultUrl,
+      contentType: 'application/json',
+      dataType: 'text',
+      dataFilter: function(data, type) {
         if (dataFilter) {
           return dataFilter(data);
         } else {
           return JSON.parse(data);
         }
       },
-      type : 'POST',
-      processData : false,
-      data : JSON.stringify(postdata),
-      success : function(resp) {
+      type: 'POST',
+      processData: false,
+      data: JSON.stringify(postdata),
+      success: function(resp) {
         if (resp && !resp.error) {
           return callbacks.success && callbacks.success(resp.result);
         } else if (resp && resp.error) {
@@ -123,11 +123,11 @@
           return callbacks.fault && callbacks.fault(resp);
         }
       },
-      error : function(xhr, status, error) {
+      error: function(xhr, status, error) {
         if (error === 'timeout') {
           callbacks.fault({
-            code : 0,
-            message : 'Request Timeout'
+            code: 0,
+            message: 'Request Timeout'
           });
           return;
         }
@@ -135,24 +135,23 @@
         try {
           var res = JSON.parse(xhr.responseText);
           callbacks.fault(res.error);
-        } catch(e) {
+        } catch (e) {
           callbacks.fault({
             code: 0,
             message: error
           });
         }
       }
-    }
-    if (data.timeout){
-      ajaxopts['timeout'] = data.timeout
+    };
+    if (data.timeout) {
+      ajaxopts['timeout'] = data.timeout;
     }
 
     $.ajax(ajaxopts);
 
     return $;
   }
-  
-  $.jsonrpc.defaultUrl = $.jsonrpc.defaultUrl || '/jsonrpc/'
+  $.jsonrpc.defaultUrl = $.jsonrpc.defaultUrl || '/jsonrpc/';
 
 })(jQuery);
 
