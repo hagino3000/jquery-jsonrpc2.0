@@ -9,7 +9,7 @@ Usage:
 
   where data = {method:'methodname', params:['positional', 'parameters']}
   or data = {method:'complexmethod', params:{named:'parameters', works:'too!'}}
-  and callbacks = {success: successFunc, fault: faultFunc}
+  and callbacks = {success: successHandler, error: errorHandler}
 
   Setting no callback produces a JSON-RPC Notification.
   'data' accepts 'timeout' keyword too, who sets the $.ajax request timeout.
@@ -25,7 +25,7 @@ Examples:
     success : function(result) {
       doSomething(result);
     },
-    fault : function(error) {
+    error : function(error) {
       console.info('code:', error.code);
       console.info('message:', error.message);
       console.dir(error.data);

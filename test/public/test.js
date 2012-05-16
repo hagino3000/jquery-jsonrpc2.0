@@ -1,11 +1,11 @@
 module('RPC');
 
-asyncTest('Simple method call', function(){
+asyncTest('Simple method call', function() {
   var res1, res2, res3;
 
   $.jsonrpc({
-    url : '/rpc',
-    method : 'simpleMethod'
+    url: '/rpc',
+    method: 'simpleMethod'
   }, function(result) {
     res1 = result.str;
     res2 = result.num;
@@ -20,26 +20,72 @@ asyncTest('Simple method call', function(){
   }, 500);
 });
 
-asyncTest('Use parameter', function(){
+asyncTest('Set defaultUrl (success)', function() {
+  var success, error;
+
+  $.jsonrpc.defaultUrl = '/rpc';
+
+  $.jsonrpc({
+    method: 'simpleMethod'
+  }, {
+    success: function(result) {
+      success = true;
+    },
+    error: function(e) {
+      error = true;
+    }
+  });
+
+  setTimeout(function() {
+    strictEqual(success, true, 'Successfuly called defaultUrl');
+    strictEqual(error, undefined, 'Error callback did not called');
+    start();
+  }, 500);
+});
+
+asyncTest('Set defaultUrl (error)', function() {
+  var success, error;
+
+  $.jsonrpc.defaultUrl = '/missing';
+
+  $.jsonrpc({
+    method: 'simpleMethod'
+  }, {
+    success: function(result) {
+      success = true;
+    },
+    error: function(e) {
+      error = true;
+    }
+  });
+
+  setTimeout(function() {
+    strictEqual(success, undefined, 'Success callback never called');
+    strictEqual(error, true, 'Error callback should be called');
+    start();
+  }, 500);
+});
+
+asyncTest('Use parameter', function() {
   var res, calledSuccess = false, calledFailure = false;
   $.jsonrpc({
-    url : '/rpc',
-    method : 'normalMethod',
-    params : {
-      p1 : 100,
-      p2 : 'This is Parameter2',
-      p3 : false,
-      p4 : [0, 1, 2, 3],
-      p5 : {
-        hoge : 'fuga'
+    url: '/rpc',
+    method: 'normalMethod',
+    params: {
+      p1: 100,
+      p2: 'This is Parameter2',
+      p3: false,
+      p4: [0, 1, 2, 3],
+      p5: {
+        hoge: 'fuga'
       }
     }
   }, {
-    success : function(result) {
+    success: function(result) {
       calledSuccess = true;
       res = result;
     },
-    fault : function(error) {
+    error: function(error) {
       calledFailure = true;
     }
   });
@@ -50,23 +96,23 @@ asyncTest('Use parameter', function(){
     equals(res.p1, 200, 'Parameter1');
     equals(res.p2, 'This is Parameter2ZZZ', 'Parameter2');
     equals(res.p3, true, 'Parameter3');
-    deepEqual(res.p4, [0, 1, 4, 9], 'Parameter4'); 
-    deepEqual(res.p5, {hoge : 'fuga'}, 'Parameter5');
+    deepEqual(res.p4, [0, 1, 4, 9], 'Parameter4');
+    deepEqual(res.p5, {hoge: 'fuga'}, 'Parameter5');
     start();
   }, 500);
 });
 
-asyncTest('Timeout', function(){
+asyncTest('Timeout', function() {
   var msg, calledSuccess = false, calledFailure = false;
   $.jsonrpc({
-    url : '/rpc',
-    method : 'timeoutMethod',
-    timeout : 500
+    url: '/rpc',
+    method: 'timeoutMethod',
+    timeout: 500
   }, {
-    success : function(result) {
+    success: function(result) {
       calledSuccess = true;
     },
-    fault : function(error) {
+    error: function(error) {
       calledFailure = true;
       msg = error.message;
     }
@@ -79,16 +125,16 @@ asyncTest('Timeout', function(){
   }, 1000);
 });
 
-asyncTest('RPC failuer', function(){
+asyncTest('RPC failuer', function() {
   var code, data, calledSuccess = false, calledFailure = false;
   $.jsonrpc({
-    url : '/rpc',
-    method : 'returnErrorMethod'
+    url: '/rpc',
+    method: 'returnErrorMethod'
   }, {
-    success : function() {
+    success: function() {
       calledSuccess = true;
     },
-    fault : function(error) {
+    error: function(error) {
       calledFailure = true;
       code = error.code;
       data = error.data.msg;
@@ -104,39 +150,15 @@ asyncTest('RPC failuer', function(){
   }, 500);
 });
 
-asyncTest('Method missing 404 : No method specified', function(){
+asyncTest('Method missing 404 : No method specified', function() {
   var code, calledSuccess = false, calledFailure = false;
   $.jsonrpc({
-    url : '/rpc' // no method set
+    url: '/rpc' // no method set
   }, {
-    success : function() {
+    success: function() {
       calledSuccess = true;
     },
-    fault : function(error) {
-      calledFailure = true;
-      code = error.code;
-    },
-  });
-
-  setTimeout(function() {
-    equals(calledSuccess, false, 'Never called success callback');
-    equals(calledFailure, true, 'Called failuer callback');
-    equals(code, -32601, 'Returns Bad Request');
-    start();
-  }, 500);
-});
-
-
-asyncTest('Method missing 404: Invalid method name', function(){
-  var code, calledSuccess = false, calledFailure = false;
-  $.jsonrpc({
-    url : '/rpc',
-    method : 'unknownMethod'
-  }, {
-    success : function() {
-      calledSuccess = true;
-    },
-    fault : function(error) {
+    error: function(error) {
       calledFailure = true;
       code = error.code;
     }
@@ -150,16 +172,40 @@ asyncTest('Method missing 404: Invalid method name', function(){
   }, 500);
 });
 
-asyncTest('Internal Server Error 500', function(){
+
+asyncTest('Method missing 404: Invalid method name', function() {
   var code, calledSuccess = false, calledFailure = false;
   $.jsonrpc({
-    url : '/rpc',
-    method : 'throwErrorMethod'
+    url: '/rpc',
+    method: 'unknownMethod'
   }, {
-    success : function() {
+    success: function() {
       calledSuccess = true;
     },
-    fault : function(error) {
+    error: function(error) {
+      calledFailure = true;
+      code = error.code;
+    }
+  });
+
+  setTimeout(function() {
+    equals(calledSuccess, false, 'Never called success callback');
+    equals(calledFailure, true, 'Called failuer callback');
+    equals(code, -32601, 'Returns Bad Request');
+    start();
+  }, 500);
+});
+
+asyncTest('Internal Server Error 500', function() {
+  var code, calledSuccess = false, calledFailure = false;
+  $.jsonrpc({
+    url: '/rpc',
+    method: 'throwErrorMethod'
+  }, {
+    success: function() {
+      calledSuccess = true;
+    },
+    error: function(error) {
       calledFailure = true;
       code = error.code;
     }

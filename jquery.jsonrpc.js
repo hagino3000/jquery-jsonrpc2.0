@@ -1,7 +1,7 @@
 /*
  * jQuery JSON-RPC Plugin
  *
- * @version: 0.2(2011-03-14)
+ * @version: 0.3(2012-05-17)
  * @author hagino3000 <http://twitter.com/hagino3000> (Takashi Nishibayashi)
  * @author alanjds <http://twitter.com/alanjds> (Alan Justino da Silva)
  *
@@ -16,7 +16,7 @@
  *
  *   where data = {url: '/rpc/', method:'simplefunc', params:['posi', 'tional']}
  *   or data = {url: '/rpc/', method:'complexfunc', params:{nam:'ed', par:'ams'}}
- *   and callbacks = {success: successFunc, fault: faultFunc, error: errorFunc}
+ *   and callbacks = {success: successFunc, error: errorFunc}
  *
  *   Setting no callback produces a JSON-RPC Notification.
  *   'data' accepts 'timeout' keyword too, who sets the $.ajax request timeout.
@@ -32,21 +32,22 @@
  *     success : function(result) {
  *       //doSomething
  *     },
- *     fault : function(error) {
+ *     error : function(error) {
  *       //doSomething
  *     }
  *   });
  *
+ *   // Once set defaultUrl, url option is no need
+ *   $.jsonrpc.defaultUrl = '/rpc';
+ *
  *   // A Notification 
  *   $.jsonrpc({
- *     url : '/rpc', 
  *     method : 'notify',
  *     params : {action : 'logout', userId : '1000'}
  *   });
  *
  *   // A Notification using console to debug and with timeout set
  *   $.jsonrpc({
- *     url : '/rpc', 
  *     method : 'notify',
  *     params : {action : 'logout', userId : '1000'},
  *     debug : true,
@@ -55,7 +56,6 @@
  *
  *   // Set DataFilter. It is useful for buggy API that returns sometimes not json but html (when 500, 403..).
  *   $.jsonrpc({
- *     url : '/rpc',
  *     method : 'getUser',
  *     dataFilter : function(data, type) {
  *       try {
@@ -66,7 +66,7 @@
  *     }, function(result){ doSomething... }
  *   }, {
  *     success : handleSuccess
- *     fault : handleFailure
+ *     error : handleFailure
  *   });
  *
  * This document is licensed as free software under the terms of the
@@ -94,7 +94,7 @@
     if (typeof(callbacks) === 'function') {
       callbacks = {
         success: callbacks,
-        fault: callbacks
+        error: callbacks
       };
     }
 
@@ -118,14 +118,15 @@
         if (resp && !resp.error) {
           return callbacks.success && callbacks.success(resp.result);
         } else if (resp && resp.error) {
-          return callbacks.fault && callbacks.fault(resp.error);
+          return callbacks.error && callbacks.error(resp.error);
         } else {
-          return callbacks.fault && callbacks.fault(resp);
+          return callbacks.error && callbacks.error(resp);
         }
       },
       error: function(xhr, status, error) {
         if (error === 'timeout') {
-          callbacks.fault({
+          callbacks.error({
+            status: status,
             code: 0,
             message: 'Request Timeout'
           });
@@ -134,9 +135,10 @@
         // If response code is 404, 400, 500, server returns error object
         try {
           var res = JSON.parse(xhr.responseText);
-          callbacks.fault(res.error);
+          callbacks.error(res.error);
         } catch (e) {
-          callbacks.fault({
+          callbacks.error({
+            status: status,
             code: 0,
             message: error
           });
