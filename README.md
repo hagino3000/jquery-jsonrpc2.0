@@ -63,6 +63,10 @@ $.jsonrpc({
 You can see more sample in test/public/test.js.  
 Also server side code in test/app.js, written for node.js.
 
+## Support
+
+jQuery > 1.7
+
 ## License
 
 MIT
