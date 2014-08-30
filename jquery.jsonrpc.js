@@ -1,7 +1,7 @@
 /*
  * jQuery JSON-RPC Plugin
  *
- * @version: 0.3(2012-05-17)
+ * @version: 1.0(2014-08-31)
  * @author hagino3000 <http://twitter.com/hagino3000> (Takashi Nishibayashi)
  * @author alanjds <http://twitter.com/alanjds> (Alan Justino da Silva)
  *
