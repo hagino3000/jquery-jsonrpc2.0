@@ -116,6 +116,29 @@ asyncTest('Use parameter', function() {
     }, 500);
 });
 
+asyncTest('Batch Request', function() {
+    var res, calledSuccess = false, calledFailure = false;
+    $.jsonrpc.defaultUrl = '/rpc';
+    $.jsonrpc([{
+        method: 'normalMethodA'
+    }, {
+        method: 'normalMethodB'
+    }]).done(function(results){
+        calledSuccess = true;
+        res = results;
+    }).fail(function(error){
+        calledFailure = true;
+    });
+
+    setTimeout(function() {
+        equals(calledSuccess, true, 'Called success callback');
+        equals(calledFailure, false, 'Never called failuer callback');
+        equals(res[0].result.name, 'paniponi', 'RPC1');
+        equals(res[1].result.title, 'overview', 'RPC2');
+        start();
+    }, 500);
+});
+
 asyncTest('Timeout', function() {
     var msg, calledSuccess = false, calledFailure = false;
     $.jsonrpc({

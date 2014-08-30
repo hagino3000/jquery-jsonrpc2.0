@@ -20,7 +20,6 @@ $.jsonrpc(data [, ajaxOpts])
 ## Examples
 
 ```
-// A RPC call with named parameters
 $.jsonrpc.defaultUrl = '/rpc';
 
 // Use promise
@@ -50,6 +49,37 @@ $.jsonrpc({
     }
 });
 ```
+
+### Batch Request
+
+Send several RPC Requests in one HTTP request. Always calls success callback.
+
+```
+$.jsonrpc.defaultUrl = '/rpc';
+
+// Send 3 requests at once.
+$.jsonrpc([{
+    method : 'getEventStatus'
+}, {
+    method : 'getUserStatus'
+}, {
+    method : 'sendLoginStatus',
+    params : {status: 'login'}
+}]).done(function(responses) {
+    // Here comes all success and error results without notify request.
+    // Results are sorted by RPC Id (the same as 1st arguments)
+    results.forEach(function(response) {
+        if (response.result) {
+            doSomething(response.result);
+        } else {
+            doSomething(response.error);
+        }
+    });
+}).fail(function(error) {
+    // timeout
+});
+```
+
 
 ### Notification
 

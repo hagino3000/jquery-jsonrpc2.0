@@ -1,6 +1,7 @@
 /**
  * Module dependencies.
  */
+var util = require('util');
 var express = require('express');
 var bodyParser = require('body-parser');
 var errorhandler = require('errorhandler')
@@ -23,18 +24,39 @@ app.get('/', function(req, res){
 // RPC end point
 app.post('/rpc', function(req, res) {
     res.header('Content-Type', 'application/json');
-    var data = req.body, err = null, rpcMethod;
+    var data = req.body;
 
-    if (!err && data.jsonrpc !== '2.0') {
+    if (util.isArray(data)) {
+        var results = [];
+        var finishCount = 0;
+        data.forEach(function(oneRPCRequest) {
+            handleRPCRequest(oneRPCRequest, function(statusCode, response) {
+                results.push(response);
+                finishCount++;
+
+                if (finishCount === data.length) {
+                    res.status(200).send(results);
+                }
+            });
+        });
+    } else {
+        handleRPCRequest(data, function(statusCode, response) {
+            res.status(statusCode).send(response);
+        });
+    }
+});
+
+function handleRPCRequest(data, callback) {
+    var rpcMethod;
+    if (data.jsonrpc !== '2.0') {
         onError({
             code: -32600,
-            message: 'Bad Request. JSON RPC version is invalid or missing',
-            data: null
+            message: 'Bad Request. JSON RPC version is invalid or missing'
         }, 400);
         return;
     }
 
-    if (!err && !(rpcMethod = rpcMethods[data.method])) {
+    if (!(rpcMethod = rpcMethods[data.method])) {
         onError({
             code: -32601,
             message: 'Method not found : ' + data.method
@@ -45,11 +67,11 @@ app.post('/rpc', function(req, res) {
     try {
         rpcMethod(data.params, {
             onSuccess: function(result) {
-                res.status(200).send(JSON.stringify({
+                callback(200, {
                     jsonrpc: '2.0',
                     result: result,
                     id: data.id
-                }));
+                });
             },
             onFailure: function(error, statusCode) {
                 onError({
@@ -66,16 +88,15 @@ app.post('/rpc', function(req, res) {
             data: e
         }, 500);
     }
-    return;
 
     function onError(err, statusCode) {
-        res.status(statusCode).send(JSON.stringify({
+        callback(statusCode, JSON.stringify({
             jsonrpc: '2.0',
             error: err,
             id: data.id
         }));
     }
-});
+}
 
 app.post('/503html', function(req, res) {
     res.status(503).send("<html><head><title>HTTP 503 - Service (Temporarily) Unavailable</title></head><body>Sorry</body></html>");

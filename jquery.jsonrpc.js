@@ -13,15 +13,30 @@
     var rpcId = 1;
     var emptyFn = function(){};
 
-    function jsonrpc(data, ajaxOpts) {
-        var deferred = new $.Deferred();
-
-        var postdata = {
+    function makePostPayload(rpcParam) {
+        return {
             jsonrpc: '2.0',
-            method: data.method || '',
-            params: data.params || {},
+            method: rpcParam.method || '',
+            params: rpcParam.params || {},
             id: rpcId++
         };
+    }
+
+    function makePostBody(rpcParam) {
+        var payload = $.isArray(rpcParam) ? rpcParam.map(makePostPayload) : makePostPayload(rpcParam);
+        return JSON.stringify(payload);
+    }
+
+    function sortBatchResults(results) {
+        return results.sort(rpcIdComparator);
+    }
+
+    function rpcIdComparator(a, b) {
+        return a.id < b.id ? -1 : 1;
+    }
+
+    function jsonrpc(rpcParam, ajaxOpts) {
+        var deferred = new $.Deferred();
 
         ajaxOpts = ajaxOpts || {};
         var successCallback = ajaxOpts.success || emptyFn;
@@ -29,8 +44,9 @@
         delete ajaxOpts.success;
         delete ajaxOpts.error;
 
+        var isBatch = $.isArray(rpcParam);
         var ajaxParams = $.extend({
-            url: data.url || $.jsonrpc.defaultUrl,
+            url: (isBatch ? rpcParam[0].url : rpcParam.url) || $.jsonrpc.defaultUrl,
             contentType: 'application/json',
             dataType: 'text',
             dataFilter: function(data, type) {
@@ -38,19 +54,27 @@
             },
             type: 'POST',
             processData: false,
-            data: JSON.stringify(postdata),
+            data: makePostBody(rpcParam),
             success: function(resp) {
-                if (resp.hasOwnProperty('error')) {
-                    // HTTP Response 20x but error
-                    errorCallback(resp.error);
-                    deferred.reject(resp.error);
+                if (isBatch) {
+                    var orderedResults = sortBatchResults(resp);
+                    successCallback(orderedResults);
+                    deferred.resolve(orderedResults);
                     return;
+                } else {
+                    if (resp.hasOwnProperty('error')) {
+                        // HTTP Response 20x but error
+                        errorCallback(resp.error);
+                        deferred.reject(resp.error);
+                        return;
+                    }
+                    if (resp.hasOwnProperty('result')) {
+                        successCallback(resp.result);
+                        deferred.resolve(resp.result);
+                        return;
+                    }
                 }
-                if (resp.hasOwnProperty('result')) {
-                    successCallback(resp.result);
-                    deferred.resolve(resp.result);
-                    return;
-                }
+                throw 'Invalid response returned';
             },
             error: function(xhr, status, error) {
                 var result = null;

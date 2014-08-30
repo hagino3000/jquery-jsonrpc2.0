@@ -38,6 +38,22 @@ function normalMethod(params, callback) {
     });
 }
 
+function normalMethodA(params, callback) {
+    setTimeout(function() {
+        callback.onSuccess({
+            userId: 100,
+            name: 'paniponi'
+        });
+    }, 100);
+}
+
+function normalMethodB(params, callback) {
+    callback.onSuccess({
+        postId: 999,
+        title: 'overview'
+    });
+}
+
 function timeoutMethod(params, callback) {
     //NOP
 }
@@ -50,3 +66,5 @@ exports.returnErrorWith200Method = returnErrorWith200Method;
 exports.returnErrorWith503Method = returnErrorWith503Method;
 exports.normalMethod = normalMethod;
 exports.timeoutMethod = timeoutMethod;
+exports.normalMethodA = normalMethodA
+exports.normalMethodB = normalMethodB
