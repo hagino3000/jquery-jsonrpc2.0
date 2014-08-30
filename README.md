@@ -24,8 +24,8 @@ $.jsonrpc.defaultUrl = '/rpc';
 
 // Use promise
 $.jsonrpc({
-    method : 'createUser',
-    params : {name : 'John Smith', userId : '1000'}
+    method: 'createUser',
+    params: {name: 'John Smith', userId: '1000'}
 }).done(function(result) {
     doSomething(result);
 }).fail(function(error) {
@@ -36,13 +36,13 @@ $.jsonrpc({
 
 // Set callback functions
 $.jsonrpc({
-    method : 'createUser',
-    params : {name : 'John Smith', userId : '1000'}
+    method: 'createUser',
+    params: {name: 'John Smith', userId: '1000'}
 }, {
-    success : function(result) {
+    success: function(result) {
         doSomething(result);
     },
-    error : function(error) {
+    error: function(error) {
         console.info('code:', error.code);
         console.info('message:', error.message);
         console.info(error.data);
@@ -59,12 +59,12 @@ $.jsonrpc.defaultUrl = '/rpc';
 
 // Send 3 requests at once.
 $.jsonrpc([{
-    method : 'getEventStatus'
+    method: 'getEventStatus'
 }, {
-    method : 'getUserStatus'
+    method: 'getUserStatus'
 }, {
-    method : 'sendLoginStatus',
-    params : {status: 'login'}
+    method: 'sendLoginStatus',
+    params: {status: 'login'}
 }]).done(function(responses) {
     // Here comes all success and error results without notify request.
     // Results are sorted by RPC Id (the same as 1st arguments)
@@ -80,13 +80,12 @@ $.jsonrpc([{
 });
 ```
 
-
 ### Notification
 
 ```
 $.jsonrpc({
-    method : 'notify',
-    params : {action : 'logout', userId : '1000'}
+    method: 'notify',
+    params: {action: 'logout', userId: '1000'}
 });
 ```
 
