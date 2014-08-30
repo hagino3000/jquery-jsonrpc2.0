@@ -48,16 +48,15 @@ app.post('/rpc', function(req, res) {
         res.status(200).send(JSON.stringify({
           jsonrpc: '2.0',
           result: result,
-          error : null,
           id: data.id
         }));
       },
-      onFailure: function(error) {
+      onFailure: function(error, statusCode) {
         onError({
           code: -32603,
           message: 'Failed',
           data: error
-        }, 500);
+        }, statusCode || 400);
       }
     });
   } catch (e) {
