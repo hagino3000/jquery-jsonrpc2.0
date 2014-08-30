@@ -44,12 +44,12 @@
                     // HTTP Response 20x but error
                     errorCallback(resp.error);
                     deferred.reject(resp.error);
-                    return
+                    return;
                 }
                 if (resp.hasOwnProperty('result')) {
                     successCallback(resp.result);
                     deferred.resolve(resp.result);
-                    return
+                    return;
                 }
             },
             error: function(xhr, status, error) {
@@ -87,7 +87,6 @@
     $.extend({
         jsonrpc: jsonrpc
     });
-    $.jsonrpc.defaultUrl = '/jsonrpc'
+    $.jsonrpc.defaultUrl = '/jsonrpc';
 
 })(jQuery);
-
