@@ -45,12 +45,12 @@ app.post('/rpc', function(req, res) {
   try {
     rpcMethod(data.params, {
       onSuccess: function(result) {
-        res.send(JSON.stringify({
+        res.status(200).send(JSON.stringify({
           jsonrpc: '2.0',
           result: result,
           error : null,
           id: data.id
-        }), 200);
+        }));
       },
       onFailure: function(error) {
         onError({
@@ -70,11 +70,11 @@ app.post('/rpc', function(req, res) {
   return;
 
   function onError(err, statusCode) {
-    res.send(JSON.stringify({
+    res.status(statusCode).send(JSON.stringify({
       jsonrpc: '2.0',
       error: err,
       id: data.id
-    }), statusCode);
+    }));
   }
 });
 
