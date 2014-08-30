@@ -2,6 +2,7 @@
 
 A JSON-RPC 2.0 implementation for jQuery.
 JSON-RPC is a stateless, light-weight remote procedure call (RPC) protocol.
+
 Read more in the <http://groups.google.com/group/json-rpc/web/json-rpc-2-0>
 
 ## Usage
@@ -11,7 +12,7 @@ $.jsonrpc(data [, ajaxOpts])
 .done(function(result) {
    // do something
 })
-.fail(function(errir) {
+.fail(function(error) {
    // do something
 });
 ```
@@ -31,7 +32,7 @@ $.jsonrpc({
 }).fail(function(error) {
     console.info('code:', error.code);
     console.info('message:', error.message);
-    console.dir(error.data);
+    console.info(error.data);
 });
 
 // Set callback functions
@@ -45,7 +46,7 @@ $.jsonrpc({
     error : function(error) {
         console.info('code:', error.code);
         console.info('message:', error.message);
-        console.dir(error.data);
+        console.info(error.data);
     }
 });
 ```
