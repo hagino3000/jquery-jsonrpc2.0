@@ -6,10 +6,32 @@ asyncTest('Simple method call', function() {
     $.jsonrpc({
         url: '/rpc',
         method: 'simpleMethod'
-    }, function(result) {
+    }).done(function(result) {
         res1 = result.str;
         res2 = result.num;
         res3 = result.boo;
+    });
+
+    setTimeout(function() {
+        strictEqual(res1, 'Called simpleMethod', 'Result value 1 (stirng)');
+        strictEqual(res2, 1, 'Result value 2 (number)');
+        strictEqual(res3, true, 'Result value 3 (boolean)');
+        start();
+    }, 500);
+});
+
+asyncTest('Simple method call with old callback style', function() {
+    var res1, res2, res3;
+
+    $.jsonrpc({
+        url: '/rpc',
+        method: 'simpleMethod'
+    }, {
+        success: function(result) {
+            res1 = result.str;
+            res2 = result.num;
+            res3 = result.boo;
+        }
     });
 
     setTimeout(function() {
@@ -27,13 +49,10 @@ asyncTest('Set defaultUrl (success)', function() {
 
     $.jsonrpc({
         method: 'simpleMethod'
-    }, {
-        success: function(result) {
-            success = true;
-        },
-        error: function(e) {
-            error = true;
-        }
+    }).done(function(result) {
+        success = true;
+    }).fail(function(e) {
+        error = true;
     });
 
     setTimeout(function() {
@@ -43,6 +62,7 @@ asyncTest('Set defaultUrl (success)', function() {
     }, 500);
 });
 
+
 asyncTest('Set defaultUrl (error)', function() {
     var success, error;
 
@@ -50,13 +70,10 @@ asyncTest('Set defaultUrl (error)', function() {
 
     $.jsonrpc({
         method: 'simpleMethod'
-    }, {
-        success: function(result) {
-            success = true;
-        },
-        error: function(e) {
-            error = true;
-        }
+    }).done(function(result) {
+        success = true;
+    }).fail(function(e) {
+        error = true;
     });
 
     setTimeout(function() {
@@ -80,14 +97,11 @@ asyncTest('Use parameter', function() {
                 hoge: 'fuga'
             }
         }
-    }, {
-        success: function(result) {
-            calledSuccess = true;
-            res = result;
-        },
-        error: function(error) {
-            calledFailure = true;
-        }
+    }).done(function(result){
+        calledSuccess = true;
+        res = result;
+    }).fail(function(error){
+        calledFailure = true;
     });
 
     setTimeout(function() {
@@ -106,16 +120,14 @@ asyncTest('Timeout', function() {
     var msg, calledSuccess = false, calledFailure = false;
     $.jsonrpc({
         url: '/rpc',
-        method: 'timeoutMethod',
-        timeout: 500
+        method: 'timeoutMethod'
     }, {
-        success: function(result) {
-            calledSuccess = true;
-        },
-        error: function(error) {
-            calledFailure = true;
-            msg = error.message;
-        }
+        timeout: 500
+    }).done(function(result) {
+        calledSuccess = true;
+    }).fail(function(error) {
+        calledFailure = true;
+        msg = error.message;
     });
     setTimeout(function() {
         equals(calledSuccess, false, 'Never alled success callback');
@@ -130,15 +142,34 @@ asyncTest('RPC failuer', function() {
     $.jsonrpc({
         url: '/rpc',
         method: 'returnErrorMethod'
-    }, {
-        success: function() {
-            calledSuccess = true;
-        },
-        error: function(error) {
-            calledFailure = true;
-            code = error.code;
-            data = error.data.msg;
-        }
+    }).done(function() {
+        calledSuccess = true;
+    }).fail(function(error) {
+        calledFailure = true;
+        code = error.code;
+        data = error.data.msg;
+    });
+
+    setTimeout(function() {
+        equals(calledSuccess, false, 'Never called success callback');
+        equals(calledFailure, true, 'Called failuer callback');
+        equals(code, -32603, 'RPC fault');
+        equals(data, 'this is error', 'error data');
+        start();
+    }, 500);
+});
+
+asyncTest('RPC failuer with old style callback params', function() {
+    var code, data, calledSuccess = false, calledFailure = false;
+    $.jsonrpc({
+        url: '/rpc',
+        method: 'returnErrorMethod'
+    }).done(function() {
+        calledSuccess = true;
+    }).fail(function(error) {
+        calledFailure = true;
+        code = error.code;
+        data = error.data.msg;
     });
 
     setTimeout(function() {
@@ -154,14 +185,11 @@ asyncTest('Method missing 404 : No method specified', function() {
     var code, calledSuccess = false, calledFailure = false;
     $.jsonrpc({
         url: '/rpc' // no method set
-    }, {
-        success: function() {
-            calledSuccess = true;
-        },
-        error: function(error) {
-            calledFailure = true;
-            code = error.code;
-        }
+    }).done(function() {
+        calledSuccess = true;
+    }).fail(function(error) {
+        calledFailure = true;
+        code = error.code;
     });
 
     setTimeout(function() {
@@ -178,14 +206,11 @@ asyncTest('Method missing 404: Invalid method name', function() {
     $.jsonrpc({
         url: '/rpc',
         method: 'unknownMethod'
-    }, {
-        success: function() {
-            calledSuccess = true;
-        },
-        error: function(error) {
-            calledFailure = true;
-            code = error.code;
-        }
+    }).done(function() {
+        calledSuccess = true;
+    }).fail(function(error) {
+        calledFailure = true;
+        code = error.code;
     });
 
     setTimeout(function() {
@@ -201,14 +226,11 @@ asyncTest('Internal Server Error 500', function() {
     $.jsonrpc({
         url: '/rpc',
         method: 'throwErrorMethod'
-    }, {
-        success: function() {
-            calledSuccess = true;
-        },
-        error: function(error) {
-            calledFailure = true;
-            code = error.code;
-        }
+    }).done(function() {
+        calledSuccess = true;
+    }).fail(function(error) {
+        calledFailure = true;
+        code = error.code;
     });
 
     setTimeout(function() {

@@ -7,7 +7,13 @@ Read more in the <http://groups.google.com/group/json-rpc/web/json-rpc-2-0>
 ## Usage
 
 ```
-$.jsonrpc(data [, callbacks]);
+$.jsonrpc(data [, ajaxOpts])
+.done(function(result) {
+   // do something
+})
+.fail(function(errir) {
+   // do something
+});
 ```
 
 ## Examples
@@ -15,6 +21,20 @@ $.jsonrpc(data [, callbacks]);
 ```
 // A RPC call with named parameters
 $.jsonrpc.defaultUrl = '/rpc';
+
+// Use promise
+$.jsonrpc({
+    method : 'createUser',
+    params : {name : 'John Smith', userId : '1000'}
+}).done(function(result) {
+    doSomething(result);
+}).fail(function(error) {
+    console.info('code:', error.code);
+    console.info('message:', error.message);
+    console.dir(error.data);
+});
+
+// Set callback functions
 $.jsonrpc({
     method : 'createUser',
     params : {name : 'John Smith', userId : '1000'}
@@ -30,7 +50,7 @@ $.jsonrpc({
 });
 ```
 
-### A Notification 
+### Notification
 
 ```
 $.jsonrpc({

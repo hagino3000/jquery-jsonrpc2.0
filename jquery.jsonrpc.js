@@ -10,86 +10,84 @@
  * Read more in the <http://groups.google.com/group/json-rpc/web/json-rpc-2-0>
  */
 (function($) {
+    var rpcId = 1;
+    var emptyFn = function(){};
 
-    var rpcid = 1,
-        emptyFn = function() {};
-
-    $.jsonrpc = $.jsonrpc || function(data, callbacks) {
+    function jsonrpc(data, ajaxOpts) {
+        var deferred = new $.Deferred();
 
         var postdata = {
             jsonrpc: '2.0',
             method: data.method || '',
-            params: data.params || {}
+            params: data.params || {},
+            id: rpcId++
         };
-        if (callbacks) {
-            postdata.id = data.id || rpcid++;
-        } else {
-            callbacks = emptyFn;
-        }
 
-        if (typeof(callbacks) === 'function') {
-            callbacks = {
-                success: callbacks,
-                error: callbacks
-            };
-        }
+        ajaxOpts = ajaxOpts || {};
+        var successCallback = ajaxOpts.success || emptyFn;
+        var errorCallback = ajaxOpts.error || emptyFn;
+        delete ajaxOpts.success;
+        delete ajaxOpts.error;
 
-        var dataFilter = data.dataFilter;
-
-        var ajaxopts = {
+        var ajaxParams = $.extend({
             url: data.url || $.jsonrpc.defaultUrl,
             contentType: 'application/json',
             dataType: 'text',
             dataFilter: function(data, type) {
-                if (dataFilter) {
-                    return dataFilter(data);
-                } else {
-                    return JSON.parse(data);
-                }
+                return JSON.parse(data);
             },
             type: 'POST',
             processData: false,
             data: JSON.stringify(postdata),
             success: function(resp) {
-                if (resp && !resp.error) {
-                    return callbacks.success && callbacks.success(resp.result);
-                } else if (resp && resp.error) {
-                    return callbacks.error && callbacks.error(resp.error);
-                } else {
-                    return callbacks.error && callbacks.error(resp);
+                if (resp.hasOwnProperty('error')) {
+                    // HTTP Response 20x but error
+                    errorCallback(resp.error);
+                    deferred.reject(resp.error);
+                    return
+                }
+                if (resp.hasOwnProperty('result')) {
+                    successCallback(resp.result);
+                    deferred.resolve(resp.result);
+                    return
                 }
             },
             error: function(xhr, status, error) {
-               if (error === 'timeout') {
-                   callbacks.error({
-                       status: status,
-                       code: 0,
-                       message: 'Request Timeout'
-                   });
-                   return;
-               }
-               // If response code is 404, 400, 500, server returns error object
-               try {
-                   var res = JSON.parse(xhr.responseText);
-                   callbacks.error(res.error);
-               } catch (e) {
-                   callbacks.error({
-                       status: status,
-                       code: 0,
-                       message: error
-                   });
-               }
+                var result = null;
+                if (error === 'timeout') {
+                    result = {
+                        status: status,
+                        code: 0,
+                        message: "Request Timeout",
+                        data: null
+                    };
+                } else {
+                    try {
+                        var res = JSON.parse(xhr.responseText);
+                        result = res.error;
+                    } catch (e) {
+                        result = {
+                            status: status,
+                            code: 0,
+                            message: error,
+                            data: xhr.responseText
+                        };
+                    }
+                }
+                errorCallback(result);
+                deferred.reject(result);
             }
-        };
-        if (data.timeout) {
-            ajaxopts['timeout'] = data.timeout;
-        }
+        }, ajaxOpts);
 
-        $.ajax(ajaxopts);
+        $.ajax(ajaxParams);
 
-        return $;
+        return deferred.promise();
     }
-    $.jsonrpc.defaultUrl = $.jsonrpc.defaultUrl || '/jsonrpc/';
+
+    $.extend({
+        jsonrpc: jsonrpc
+    });
+    $.jsonrpc.defaultUrl = '/jsonrpc'
 
 })(jQuery);
 
