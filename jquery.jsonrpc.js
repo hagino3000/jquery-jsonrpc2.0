@@ -12,7 +12,7 @@
  * Requires json2.js<http://www.json.org/json2.js> if browser has not window.JSON.
  *
  * Usage:
- *   $.jsonrpc(data [, callbacks [, debug]]);
+ *   $.jsonrpc(data [, callbacks]);
  *
  *   where data = {url: '/rpc/', method:'simplefunc', params:['posi', 'tional']}
  *   or data = {url: '/rpc/', method:'complexfunc', params:{nam:'ed', par:'ams'}}
@@ -20,7 +20,6 @@
  *
  *   Setting no callback produces a JSON-RPC Notification.
  *   'data' accepts 'timeout' keyword too, who sets the $.ajax request timeout.
- *   Setting 'debug' to true prints responses to Firebug's console.info
  *
  * Examples:
  *   // A RPC call with named parameters
@@ -46,14 +45,6 @@
  *     params : {action : 'logout', userId : '1000'}
  *   });
  *
- *   // A Notification using console to debug and with timeout set
- *   $.jsonrpc({
- *     method : 'notify',
- *     params : {action : 'logout', userId : '1000'},
- *     debug : true,
- *     timeout : 500,
- *   });
- *
  *   // Set DataFilter. It is useful for buggy API that returns sometimes not json but html (when 500, 403..).
  *   $.jsonrpc({
  *     method : 'getUser',
@@ -77,8 +68,7 @@
   var rpcid = 1,
       emptyFn = function() {};
 
-  $.jsonrpc = $.jsonrpc || function(data, callbacks, debug) {
-    debug = debug || false;
+  $.jsonrpc = $.jsonrpc || function(data, callbacks) {
 
     var postdata = {
       jsonrpc: '2.0',
