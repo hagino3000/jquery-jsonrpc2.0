@@ -8,60 +8,6 @@
  * A JSON-RPC 2.0 implementation for jQuery.
  * JSON-RPC is a stateless, light-weight remote procedure call (RPC) protocol.
  * Read more in the <http://groups.google.com/group/json-rpc/web/json-rpc-2-0>
- *
- * Requires json2.js<http://www.json.org/json2.js> if browser has not window.JSON.
- *
- * Usage:
- *   $.jsonrpc(data [, callbacks]);
- *
- *   where data = {url: '/rpc/', method:'simplefunc', params:['posi', 'tional']}
- *   or data = {url: '/rpc/', method:'complexfunc', params:{nam:'ed', par:'ams'}}
- *   and callbacks = {success: successFunc, error: errorFunc}
- *
- *   Setting no callback produces a JSON-RPC Notification.
- *   'data' accepts 'timeout' keyword too, who sets the $.ajax request timeout.
- *
- * Examples:
- *   // A RPC call with named parameters
- *   $.jsonrpc({
- *     url : '/rpc', 
- *     method : 'createUser',
- *     params : {name : 'John Smith', userId : '1000'}
- *   }, {
- *     success : function(result) {
- *       //doSomething
- *     },
- *     error : function(error) {
- *       //doSomething
- *     }
- *   });
- *
- *   // Once set defaultUrl, url option is no need
- *   $.jsonrpc.defaultUrl = '/rpc';
- *
- *   // A Notification 
- *   $.jsonrpc({
- *     method : 'notify',
- *     params : {action : 'logout', userId : '1000'}
- *   });
- *
- *   // Set DataFilter. It is useful for buggy API that returns sometimes not json but html (when 500, 403..).
- *   $.jsonrpc({
- *     method : 'getUser',
- *     dataFilter : function(data, type) {
- *       try {
- *         return JSON.parse(data);
- *       } catch(e) {
- *         return {error : {message : 'Cannot parse response', data : data}};
- *       }
- *     }, function(result){ doSomething... }
- *   }, {
- *     success : handleSuccess
- *     error : handleFailure
- *   });
- *
- * This document is licensed as free software under the terms of the
- * MIT License: http://www.opensource.org/licenses/mit-license.php
  */
 (function($) {
 
