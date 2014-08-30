@@ -137,7 +137,7 @@ asyncTest('Timeout', function() {
     }, 1000);
 });
 
-asyncTest('RPC failuer', function() {
+asyncTest('RPC failuer (HTTP 400)', function() {
     var code, data, calledSuccess = false, calledFailure = false;
     $.jsonrpc({
         url: '/rpc',
@@ -155,6 +155,28 @@ asyncTest('RPC failuer', function() {
         equals(calledFailure, true, 'Called failuer callback');
         equals(code, -32603, 'RPC fault');
         equals(data, 'this is error', 'error data');
+        start();
+    }, 500);
+});
+
+asyncTest('RPC failuer (HTTP 200)', function() {
+    var code, data, calledSuccess = false, calledFailure = false;
+    $.jsonrpc({
+        url: '/rpc',
+        method: 'returnErrorWith200Method'
+    }).done(function() {
+        calledSuccess = true;
+    }).fail(function(error) {
+        calledFailure = true;
+        code = error.code;
+        data = error.data.msg;
+    });
+
+    setTimeout(function() {
+        equals(calledSuccess, false, 'Never called success callback');
+        equals(calledFailure, true, 'Called failuer callback');
+        equals(code, -32603, 'RPC fault');
+        equals(data, 'this is error but HTTP status is 200', 'error data');
         start();
     }, 500);
 });
@@ -221,7 +243,7 @@ asyncTest('Method missing 404: Invalid method name', function() {
     }, 500);
 });
 
-asyncTest('Internal Server Error 500', function() {
+asyncTest('Internal Server Error 500 JSON Response', function() {
     var code, calledSuccess = false, calledFailure = false;
     $.jsonrpc({
         url: '/rpc',
@@ -241,3 +263,62 @@ asyncTest('Internal Server Error 500', function() {
     }, 500);
 });
 
+asyncTest('Internal Server Error 500 HTML Response', function() {
+    var code, calledSuccess = false, calledFailure = false;
+    $.jsonrpc({
+        url: '/500html',
+        method: 'throwErrorMethod'
+    }).done(function() {
+        calledSuccess = true;
+    }).fail(function(error) {
+        calledFailure = true;
+        code = error.code;
+    });
+
+    setTimeout(function() {
+        equals(calledSuccess, false, 'Never called success callback');
+        equals(calledFailure, true, 'Called failuer callback');
+        equals(code, -32603, 'Returns Server Error');
+        start();
+    }, 500);
+});
+
+asyncTest('Temporary Service unavailable 503 JSON Response', function() {
+    var code, calledSuccess = false, calledFailure = false;
+    $.jsonrpc({
+        url: '/rpc',
+        method: 'returnErrorWith503Method'
+    }).done(function() {
+        calledSuccess = true;
+    }).fail(function(error) {
+        calledFailure = true;
+        code = error.code;
+    });
+
+    setTimeout(function() {
+        equals(calledSuccess, false, 'Never called success callback');
+        equals(calledFailure, true, 'Called failuer callback');
+        equals(code, -32603, 'Returns Server Error');
+        start();
+    }, 500);
+});
+
+asyncTest('Temporary Service unavailable 503 HTML Response', function() {
+    var code, calledSuccess = false, calledFailure = false;
+    $.jsonrpc({
+        url: '/503html',
+        method: 'hoge'
+    }).done(function() {
+        calledSuccess = true;
+    }).fail(function(error) {
+        calledFailure = true;
+        code = error.code;
+    });
+
+    setTimeout(function() {
+        equals(calledSuccess, false, 'Never called success callback');
+        equals(calledFailure, true, 'Called failuer callback');
+        equals(code, -32603, 'Returns Server Error');
+        start();
+    }, 500);
+});

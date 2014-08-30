@@ -8,14 +8,24 @@ function simpleMethod(params, callback) {
 
 function throwErrorMethod(params, callback) {
   throw 'error';
-
-  callback.onSuccess();
 }
 
 function returnErrorMethod(params, callback) {
   callback.onFailure({
     msg : 'this is error'
   });
+}
+
+function returnErrorWith503Method(params, callback) {
+  callback.onFailure({
+    msg : 'this is error'
+  }, 503);
+}
+
+function returnErrorWith200Method(params, callback) {
+  callback.onFailure({
+    msg : 'this is error but HTTP status is 200'
+  }, 200);
 }
 
 function normalMethod(params, callback) {
@@ -36,5 +46,7 @@ function timeoutMethod(params, callback) {
 exports.simpleMethod = simpleMethod;
 exports.throwErrorMethod = throwErrorMethod;
 exports.returnErrorMethod = returnErrorMethod;
+exports.returnErrorWith200Method = returnErrorWith200Method;
+exports.returnErrorWith503Method = returnErrorWith503Method;
 exports.normalMethod = normalMethod;
 exports.timeoutMethod = timeoutMethod;

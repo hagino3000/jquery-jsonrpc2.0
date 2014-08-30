@@ -57,7 +57,7 @@
                 if (error === 'timeout') {
                     result = {
                         status: status,
-                        code: 0,
+                        code: -32000,
                         message: "Request Timeout",
                         data: null
                     };
@@ -68,7 +68,7 @@
                     } catch (e) {
                         result = {
                             status: status,
-                            code: 0,
+                            code: -32603,
                             message: error,
                             data: xhr.responseText
                         };

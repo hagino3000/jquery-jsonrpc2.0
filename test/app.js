@@ -77,6 +77,14 @@ app.post('/rpc', function(req, res) {
   }
 });
 
+app.post('/503html', function(req, res) {
+    res.status(503).send("<html><head><title>HTTP 503 - Service (Temporarily) Unavailable</title></head><body>Sorry</body></html>");
+});
+
+app.post('/500html', function(req, res) {
+    res.status(500).send("<html><head><title>HTTP 500 - Server Error</title></head><body>Sorry</body></html>");
+});
+
 var port = 3000
 app.listen(port);
 console.log("Express server listening on port %d", port)
