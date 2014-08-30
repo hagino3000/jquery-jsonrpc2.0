@@ -17,6 +17,18 @@ $.jsonrpc(data [, ajaxOpts])
 });
 ```
 
+## Getting Started
+
+```
+$ bower install hagino3000/jquery-jsonrpc2.0
+```
+
+OR paste
+
+```
+<script type="test/javascript" src="https://cdn.rawgit.com/hagino3000/jquery-jsonrpc2.0/master/jquery.jsonrpc.js"></script>
+```
+
 ## Examples
 
 ```
