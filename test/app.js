@@ -1,29 +1,19 @@
-
 /**
  * Module dependencies.
  */
-
 var express = require('express');
+var bodyParser = require('body-parser');
+var errorhandler = require('errorhandler')
+
 var rpcMethods = require('./methods.js');
 
-var app = module.exports = express.createServer();
+var app = express();
 
 // Configuration
+app.use(bodyParser.json());
+app.use(express.static(__dirname + '/public'));
+app.use(errorhandler({ dumpExceptions: true, showStack: true })); 
 
-app.configure(function(){
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
-  app.use(express.static(__dirname + '/public'));
-});
-
-app.configure('development', function(){
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
-});
-
-app.configure('production', function(){
-  app.use(express.errorHandler()); 
-});
 
 // Routes
 app.get('/', function(req, res){
@@ -88,8 +78,6 @@ app.post('/rpc', function(req, res) {
   }
 });
 
-// Only listen on $ node app.js
-if (!module.parent) {
-  app.listen(3000);
-  console.log("Express server listening on port %d", app.address().port)
-}
+var port = 3000
+app.listen(port);
+console.log("Express server listening on port %d", port)
