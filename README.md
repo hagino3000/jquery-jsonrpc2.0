@@ -28,7 +28,7 @@ ajaxOpts | Object | NO | Set success or error callbacks. Other values (timeout, 
 ## Get Started
 
 ```
-$ bower install hagino3000/jquery-jsonrpc2.0
+$ bower install jquery-jsonrpc2.0
 ```
 
 OR paste
