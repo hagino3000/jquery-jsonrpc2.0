@@ -8,7 +8,7 @@ Read more in the <http://www.jsonrpc.org/specification>
 ## Usage
 
 ```
-$.jsonrpc(data [, ajaxOpts])
+$.jsonrpc(rpcParams [, ajaxOpts])
 .done(function(result) {
    // do something
 })
@@ -17,7 +17,15 @@ $.jsonrpc(data [, ajaxOpts])
 });
 ```
 
-## Getting Started
+Parameters
+
+Name | Type | Required | Description
+--- | --- | --- | ---
+rpcParams | Object or Array | YES | RPC Parameter. Array makes batch request.
+ajaxOpts | Object | NO | Set success or error callbacks. Other values (timeout, dataFilter, etc.) are passed to the $.ajax.
+
+
+## Get Started
 
 ```
 $ bower install hagino3000/jquery-jsonrpc2.0
