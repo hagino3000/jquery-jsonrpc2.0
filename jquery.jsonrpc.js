@@ -1,7 +1,7 @@
 /*
  * jQuery JSON-RPC Plugin
  *
- * @version: 1.0(2014-08-31)
+ * @version: 1.1(2016-03-23)
  * @author hagino3000 <http://twitter.com/hagino3000> (Takashi Nishibayashi)
  * @author alanjds <http://twitter.com/alanjds> (Alan Justino da Silva)
  *
@@ -50,7 +50,18 @@
             contentType: 'application/json',
             dataType: 'text',
             dataFilter: function(data, type) {
+							try {
                 return JSON.parse(data);
+							} catch (e) {
+								result = {
+										status: null,
+										code: -32603,
+										message: "Internal error",
+										data: null
+								};
+								errorCallback(result);
+                deferred.reject(result);
+							}
             },
             type: 'POST',
             processData: false,
