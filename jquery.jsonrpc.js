@@ -50,18 +50,18 @@
             contentType: 'application/json',
             dataType: 'text',
             dataFilter: function(data, type) {
-							try {
-                return JSON.parse(data);
-							} catch (e) {
-								result = {
-										status: null,
-										code: -32603,
-										message: "Internal error",
-										data: null
-								};
-								errorCallback(result);
-                deferred.reject(result);
-							}
+                try {
+                    return JSON.parse(data);
+                } catch (e) {
+                    result = {
+                        status: null,
+                        code: -32603,
+                        message: "Internal error",
+                        data: null
+                    };
+                    errorCallback(result);
+                    deferred.reject(result);
+                }
             },
             type: 'POST',
             processData: false,
